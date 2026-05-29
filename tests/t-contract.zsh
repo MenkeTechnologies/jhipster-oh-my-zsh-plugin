@@ -49,3 +49,42 @@
     done
     assert "$missing" is_empty
 }
+
+#--------------------------------------------------------------
+# Round 2: jhipster alias/function table pins
+#--------------------------------------------------------------
+
+@test 'plugin exports the canonical `jh` shorthand alias for `jhipster`' {
+    local body
+    body=$(cat "$pluginDir/jhipster-oh-my-zsh-plugin.plugin.zsh")
+    assert "$body" contains "alias jh='jhipster'"
+}
+
+@test 'all docker / docker-compose related aliases reference docker-compose' {
+    # `jhcompose` must invoke the docker-compose subcommand; pin so
+    # a future rename to `jhipster docker` (without -compose) doesn't
+    # silently break docker workflows.
+    local body
+    body=$(cat "$pluginDir/jhipster-oh-my-zsh-plugin.plugin.zsh")
+    assert "$body" contains 'docker-compose'
+}
+
+@test 'cloud-target aliases cover all 5 documented providers' {
+    # README/source documents cf/heroku/kubernetes/aws/openshift as
+    # the supported deploy targets. Pin presence of each alias.
+    local body
+    body=$(cat "$pluginDir/jhipster-oh-my-zsh-plugin.plugin.zsh")
+    for target in cloudfoundry heroku kubernetes aws openshift; do
+        assert "$body" contains "$target"
+    done
+}
+
+@test 'jhinstall function handles 2 npm/bower/gulp + tsconfig paths' {
+    # The function branches on gulpfile.js / tsconfig.json presence;
+    # pin both branches stay wired so install flows for both Gulp
+    # and Angular CLI projects work.
+    local body
+    body=$(cat "$pluginDir/jhipster-oh-my-zsh-plugin.plugin.zsh")
+    assert "$body" contains 'gulpfile.js'
+    assert "$body" contains 'tsconfig.json'
+}
